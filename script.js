@@ -139,9 +139,28 @@ function updateWidgets() {
     calendarGrid.appendChild(dateCell);
   }
 
-  var randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
-  quoteText.textContent = '"' + randomQuote.text + '"';
-  quoteAuthor.textContent = "— " + randomQuote.author;
+  var todayStr = now.toDateString();
+  var savedQuoteDate = localStorage.getItem("poloOS_quoteDate");
+  var savedQuoteIndex = localStorage.getItem("poloOS_quoteIndex");
+
+  var quoteIndex;
+  if (savedQuoteDate !== todayStr) {
+    if (!savedQuoteDate) {
+      quoteIndex = 4; // "Be more polo"
+    } else {
+      quoteIndex = Math.floor(Math.random() * quotes.length);
+    }
+    localStorage.setItem("poloOS_quoteDate", todayStr);
+    localStorage.setItem("poloOS_quoteIndex", quoteIndex);
+  } else {
+    quoteIndex = parseInt(savedQuoteIndex, 10);
+  }
+
+  var dailyQuote = quotes[quoteIndex];
+  if (quoteText.textContent !== '"' + dailyQuote.text + '"') {
+    quoteText.textContent = '"' + dailyQuote.text + '"';
+    quoteAuthor.textContent = "— " + dailyQuote.author;
+  }
 
   if (ytPlayer && ytPlayer.getCurrentTime && widgetCurrentTime && widgetDuration) {
     var currentTime = ytPlayer.getCurrentTime();
@@ -481,10 +500,14 @@ function updateTime() {
   }
 }
 
-setInterval(updateTime, 1000);
+setInterval(function() {
+  updateTime();
+  updateWidgets();
+}, 1000);
+updateWidgets();
 
-// Initialize dragging for all glass windows
-document.querySelectorAll(".glass-window").forEach(function(win) {
+// Initialize dragging for all glass windows and widget cards
+document.querySelectorAll(".glass-window, .widget-card").forEach(function(win) {
   dragElement(win);
 });
 
@@ -497,47 +520,34 @@ var kermitAiSendBtn = document.querySelector("#kermitAiSendBtn");
 var kermitAiHistory = document.querySelector("#kermitAiHistory");
 
 if(kermitAiIcon && kermitAiApp) {
-  kermitAiIcon.addEventListener("click", function() { openWindow(kermitAiApp); });
-  if(kermitAiAppClose) kermitAiAppClose.addEventListener("click", function() { closeWindow(kermitAiApp); });
-  
-  function addMessage(text, isUser) {
-    var msgDiv = document.createElement("div");
-    msgDiv.style.padding = "8px 12px";
-    msgDiv.style.borderRadius = "12px";
-    msgDiv.style.maxWidth = "85%";
-    msgDiv.style.marginBottom = "4px";
-    msgDiv.style.lineHeight = "1.4";
-    if (isUser) {
-      msgDiv.style.background = "rgba(0,0,0,0.05)";
-      msgDiv.style.alignSelf = "flex-end";
+  var siriGlow = document.querySelector("#siriGlow");
+  kermitAiIcon.addEventListener("click", function() {
+    if (kermitAiApp.style.display === "none") {
+      kermitAiApp.style.display = "block";
+      if (siriGlow) siriGlow.style.display = "block";
+      kermitAiHistory.style.display = "block";
+      kermitAiHistory.innerText = "Hi ho! Kermit the Frog here! What can I help you with?";
     } else {
-      msgDiv.style.background = "rgba(46, 139, 87, 0.1)";
-      msgDiv.style.alignSelf = "flex-start";
+      kermitAiApp.style.display = "none";
+      if (siriGlow) siriGlow.style.display = "none";
     }
-    msgDiv.innerText = text;
-    kermitAiHistory.appendChild(msgDiv);
-    kermitAiHistory.scrollTop = kermitAiHistory.scrollHeight;
+  });
+  
+  function setSpeechText(text) {
+    kermitAiHistory.style.display = "block";
+    kermitAiHistory.innerText = text;
+    // Retrigger animation
+    kermitAiHistory.style.animation = 'none';
+    kermitAiHistory.offsetHeight; /* trigger reflow */
+    kermitAiHistory.style.animation = null; 
   }
 
   async function handleSend() {
     var val = kermitAiInput.value.trim();
     if (!val) return;
-    addMessage(val, true);
-    kermitAiInput.value = "";
     
-    // Show typing indicator
-    var typingDiv = document.createElement("div");
-    typingDiv.style.padding = "8px 12px";
-    typingDiv.style.borderRadius = "12px";
-    typingDiv.style.maxWidth = "85%";
-    typingDiv.style.marginBottom = "4px";
-    typingDiv.style.lineHeight = "1.4";
-    typingDiv.style.background = "rgba(46, 139, 87, 0.1)";
-    typingDiv.style.alignSelf = "flex-start";
-    typingDiv.style.fontStyle = "italic";
-    typingDiv.innerText = "Kermit is thinking...";
-    kermitAiHistory.appendChild(typingDiv);
-    kermitAiHistory.scrollTop = kermitAiHistory.scrollHeight;
+    kermitAiInput.value = "";
+    setSpeechText("Hmm, let me think about that...");
 
     try {
       var prompt = "respond as kermit the frog from the muppets: " + val;
@@ -548,11 +558,9 @@ if(kermitAiIcon && kermitAiApp) {
       }
       
       var text = await response.text();
-      kermitAiHistory.removeChild(typingDiv);
-      addMessage(text, false);
+      setSpeechText(text);
     } catch (e) {
-      kermitAiHistory.removeChild(typingDiv);
-      addMessage("Sorry, my connection to the swamp is a bit weak right now. Try again later!", false);
+      setSpeechText("Sorry, my connection to the swamp is a bit weak right now. Try again later!");
     }
   }
 
