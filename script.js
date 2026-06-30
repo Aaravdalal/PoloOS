@@ -2,8 +2,7 @@ var welcomeScreen = document.querySelector("#welcome");
 var welcomeScreenClose = document.querySelector("#welcomeclose");
 var settingsButton = document.querySelector("#settingsButton");
 var settingsPanel = document.querySelector("#settingsPanel");
-var wallpaperSelect = document.querySelector("#wallpaperSelect");
-var widgetToggle = document.querySelector("#widgetToggle");
+var settingsClose = document.querySelector("#settingsclose");
 var accentButtons = Array.from(document.querySelectorAll(".settings-color"));
 var widgetsPanel = document.querySelector("#widgetsPanel");
 var clockDisplay = document.querySelector("#clockDisplay");
@@ -15,11 +14,53 @@ var quoteText = document.querySelector("#quoteText");
 var quoteAuthor = document.querySelector("#quoteAuthor");
 var body = document.body;
 
+var musicIcon = document.querySelector(".music");
+var musicPlayer = document.querySelector("#musicPlayer");
+var musicPlayerClose = document.querySelector("#musicPlayerclose");
+var musicWidget = document.querySelector("#musicWidget");
+var trackBtns = document.querySelectorAll(".track-btn");
+var widgetTrackTitle = document.querySelector("#widgetTrackTitle");
+var widgetTrackArtist = document.querySelector("#widgetTrackArtist");
+
+var ytPlayer;
+var widgetCurrentTime = document.querySelector("#widgetCurrentTime");
+var widgetDuration = document.querySelector("#widgetDuration");
+var widgetProgressBar = document.querySelector("#widgetProgressBar");
+var widgetPlayPauseBtn = document.querySelector("#widgetPlayPauseBtn");
+var widgetPrevBtn = document.querySelector("#widgetPrevBtn");
+var widgetNextBtn = document.querySelector("#widgetNextBtn");
+var widgetAlbumArt = document.querySelector("#widgetAlbumArt");
+var currentTrackIndex = 0;
+
+var galleryIcon = document.querySelector(".gallery");
+var galleryApp = document.querySelector("#galleryApp");
+var galleryAppClose = document.querySelector("#galleryAppclose");
+
+var finderIcon = document.querySelector(".finder");
+var finderApp = document.querySelector("#finderApp");
+var finderAppClose = document.querySelector("#finderAppclose");
+
+var safariIcon = document.querySelector(".safari");
+var safariApp = document.querySelector("#safariApp");
+var safariAppClose = document.querySelector("#safariAppclose");
+var safariUrl = document.querySelector("#safariUrl");
+var safariFrame = document.querySelector("#safariFrame");
+
+var mailIcon = document.querySelector(".mail");
+var mailApp = document.querySelector("#mailApp");
+var mailAppClose = document.querySelector("#mailAppclose");
+
+var notesIcon = document.querySelector(".notes");
+var notesApp = document.querySelector("#notesApp");
+var notesAppClose = document.querySelector("#notesAppclose");
+var notesArea = document.querySelector("#notesArea");
+
 var quotes = [
   { text: "The best way to predict the future is to create it.", author: "Peter Drucker" },
   { text: "Small steps every day lead to big changes.", author: "Polo OS" },
   { text: "A calm mind can build extraordinary things.", author: "Kermit" },
-  { text: "Design is not just what it looks like, but how it works.", author: "Steve Jobs" }
+  { text: "Design is not just what it looks like, but how it works.", author: "Steve Jobs" },
+  { text: "Be more polo", author: "Polo" }
 ];
 
 function closeWindow(element) {
@@ -27,7 +68,39 @@ function closeWindow(element) {
 }
 
 function openWindow(element) {
-  element.style.display = "block";
+  if (element.id === "kermitAiApp") {
+    element.style.display = "flex";
+  } else {
+    element.style.display = "block";
+  }
+}
+
+function onYouTubeIframeAPIReady() {
+  ytPlayer = new YT.Player('youtubePlayer', {
+    height: '200',
+    width: '100%',
+    videoId: 'w2IhccXakkE',
+    playerVars: { 'autoplay': 0, 'controls': 0, 'rel': 0, 'showinfo': 0 },
+    events: {
+      'onStateChange': function(event) {
+        var visBars = document.querySelectorAll('.vis-bar');
+        if (event.data == YT.PlayerState.PLAYING) {
+          widgetPlayPauseBtn.innerHTML = '<svg width="32" height="32" viewBox="0 0 24 24" fill="#000"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
+          visBars.forEach(function(b) { b.style.animationPlayState = 'running'; });
+        } else {
+          widgetPlayPauseBtn.innerHTML = '<svg width="32" height="32" viewBox="0 0 24 24" fill="#000"><path d="M8 5v14l11-7z"/></svg>';
+          visBars.forEach(function(b) { b.style.animationPlayState = 'paused'; });
+        }
+      }
+    }
+  });
+}
+
+function formatTime(seconds) {
+  if (!seconds || isNaN(seconds)) return "0:00";
+  var m = Math.floor(seconds / 60);
+  var s = Math.floor(seconds % 60);
+  return m + ":" + (s < 10 ? "0" : "") + s;
 }
 
 function updateWidgets() {
@@ -69,28 +142,151 @@ function updateWidgets() {
   var randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
   quoteText.textContent = '"' + randomQuote.text + '"';
   quoteAuthor.textContent = "— " + randomQuote.author;
+
+  if (ytPlayer && ytPlayer.getCurrentTime && widgetCurrentTime && widgetDuration) {
+    var currentTime = ytPlayer.getCurrentTime();
+    var duration = ytPlayer.getDuration();
+    if (duration > 0) {
+      widgetCurrentTime.textContent = formatTime(currentTime);
+      widgetDuration.textContent = "-" + formatTime(duration - currentTime);
+      var progress = (currentTime / duration) * 100;
+      widgetProgressBar.style.width = progress + "%";
+    }
+  }
 }
 
 welcomeScreenClose.addEventListener("click", function() {
   closeWindow(welcomeScreen);
 });
 
-settingsButton.addEventListener("click", function() {
-  settingsPanel.style.display = settingsPanel.style.display === "block" ? "none" : "block";
-});
+if (galleryIcon) { galleryIcon.addEventListener("click", function() { openWindow(galleryApp); }); }
+if (galleryAppClose) { galleryAppClose.addEventListener("click", function() { closeWindow(galleryApp); }); }
 
-wallpaperSelect.addEventListener("change", function() {
-  var selected = wallpaperSelect.value;
-  if (selected.startsWith("linear-gradient")) {
-    body.style.backgroundImage = selected;
+if (finderIcon) { finderIcon.addEventListener("click", function() { openWindow(finderApp); }); }
+if (finderAppClose) { finderAppClose.addEventListener("click", function() { closeWindow(finderApp); }); }
+
+if (safariIcon) { safariIcon.addEventListener("click", function() { openWindow(safariApp); }); }
+if (safariAppClose) { safariAppClose.addEventListener("click", function() { closeWindow(safariApp); }); }
+
+if (mailIcon) { mailIcon.addEventListener("click", function() { openWindow(mailApp); }); }
+if (mailAppClose) { mailAppClose.addEventListener("click", function() { closeWindow(mailApp); }); }
+
+if (notesIcon) { notesIcon.addEventListener("click", function() { openWindow(notesApp); }); }
+if (notesAppClose) { notesAppClose.addEventListener("click", function() { closeWindow(notesApp); }); }
+
+if (musicIcon) {
+  musicIcon.addEventListener("click", function() {
+    openWindow(musicPlayer);
+    if (musicWidget) musicWidget.style.display = "block";
+  });
+}
+
+if (musicPlayerClose) {
+  musicPlayerClose.addEventListener("click", function() {
+    closeWindow(musicPlayer);
+    if (musicWidget) musicWidget.style.display = "none";
+  });
+}
+
+if (musicWidget) {
+  musicWidget.addEventListener("click", function() {
+    if (musicPlayer.style.display === "none") {
+      openWindow(musicPlayer);
+    }
+  });
+}
+
+if (trackBtns) {
+  trackBtns.forEach(function(btn, index) {
+    btn.addEventListener("click", function() {
+      currentTrackIndex = index;
+      playTrackBtn(btn);
+    });
+  });
+}
+
+function playTrackBtn(btn) {
+  var trackId = btn.getAttribute("data-track");
+  var title = btn.getAttribute("data-title");
+  var artist = btn.getAttribute("data-artist");
+  if (ytPlayer && ytPlayer.loadVideoById) {
+    ytPlayer.loadVideoById(trackId);
+  }
+  if (widgetTrackTitle) widgetTrackTitle.textContent = title;
+  if (widgetTrackArtist) widgetTrackArtist.textContent = artist;
+  if (widgetAlbumArt) widgetAlbumArt.src = "https://img.youtube.com/vi/" + trackId + "/hqdefault.jpg";
+}
+
+if (widgetPlayPauseBtn) {
+  widgetPlayPauseBtn.addEventListener("click", function() {
+    if (ytPlayer && ytPlayer.getPlayerState) {
+      if (ytPlayer.getPlayerState() == YT.PlayerState.PLAYING) {
+        ytPlayer.pauseVideo();
+      } else {
+        ytPlayer.playVideo();
+      }
+    }
+  });
+}
+
+if (widgetPrevBtn) {
+  widgetPrevBtn.addEventListener("click", function() {
+    currentTrackIndex = (currentTrackIndex - 1 + trackBtns.length) % trackBtns.length;
+    playTrackBtn(trackBtns[currentTrackIndex]);
+  });
+}
+
+if (widgetNextBtn) {
+  widgetNextBtn.addEventListener("click", function() {
+    currentTrackIndex = (currentTrackIndex + 1) % trackBtns.length;
+    playTrackBtn(trackBtns[currentTrackIndex]);
+  });
+}
+
+if (settingsClose) {
+  settingsClose.addEventListener("click", function() {
+    closeWindow(settingsPanel);
+  });
+}
+
+settingsButton.addEventListener("click", function() {
+  if (settingsPanel.style.display === "none") {
+    openWindow(settingsPanel);
   } else {
-    body.style.backgroundImage = "url('" + selected + "')";
+    closeWindow(settingsPanel);
   }
 });
 
-widgetToggle.addEventListener("change", function() {
-  widgetsPanel.style.display = widgetToggle.value === "show" ? "flex" : "none";
+var wallpaperButtons = document.querySelectorAll(".wallpaper-item");
+wallpaperButtons.forEach(function(btn) {
+  btn.addEventListener("click", function() {
+    var selected = btn.getAttribute("data-wallpaper");
+    if (selected.startsWith("linear-gradient")) {
+      body.style.backgroundImage = selected;
+    } else {
+      body.style.backgroundImage = "url('" + selected + "')";
+    }
+    
+    // Update active border
+    wallpaperButtons.forEach(function(b) { b.style.borderColor = "transparent"; });
+    btn.style.borderColor = "var(--accent)";
+  });
 });
+
+var widgetShowBtn = document.querySelector("#widgetShowBtn");
+var widgetHideBtn = document.querySelector("#widgetHideBtn");
+if (widgetShowBtn && widgetHideBtn) {
+  widgetShowBtn.addEventListener("click", function() {
+    widgetsPanel.style.display = "flex";
+    widgetShowBtn.style.background = "#eee";
+    widgetHideBtn.style.background = "transparent";
+  });
+  widgetHideBtn.addEventListener("click", function() {
+    widgetsPanel.style.display = "none";
+    widgetHideBtn.style.background = "#eee";
+    widgetShowBtn.style.background = "transparent";
+  });
+}
 
 accentButtons.forEach(function(button) {
   button.addEventListener("click", function() {
@@ -107,6 +303,132 @@ updateWidgets();
 setInterval(updateWidgets, 1000);
 
 dragElement(document.getElementById("welcome"));
+if (document.getElementById("musicPlayer")) dragElement(document.getElementById("musicPlayer"));
+if (document.getElementById("settingsPanel")) dragElement(document.getElementById("settingsPanel"));
+if (document.getElementById("galleryApp")) dragElement(document.getElementById("galleryApp"));
+if (document.getElementById("finderApp")) dragElement(document.getElementById("finderApp"));
+if (document.getElementById("safariApp")) dragElement(document.getElementById("safariApp"));
+if (document.getElementById("mailApp")) dragElement(document.getElementById("mailApp"));
+if (document.getElementById("notesApp")) dragElement(document.getElementById("notesApp"));
+if (document.getElementById("musicWidget")) dragElement(document.getElementById("musicWidget"));
+
+// Finder Easter Eggs
+var fileSecretPlan = document.getElementById("fileSecretPlan");
+var fileTodo = document.getElementById("fileTodo");
+var finderEasterEgg = document.getElementById("finderEasterEgg");
+var closeEasterEgg = document.getElementById("closeEasterEgg");
+
+if (fileSecretPlan && finderEasterEgg) {
+  fileSecretPlan.addEventListener("click", function() {
+    finderEasterEgg.style.display = "flex";
+  });
+}
+if (fileTodo && finderEasterEgg) {
+  fileTodo.addEventListener("click", function() {
+    finderEasterEgg.style.display = "flex";
+  });
+}
+if (closeEasterEgg) {
+  closeEasterEgg.addEventListener("click", function() {
+    finderEasterEgg.style.display = "none";
+  });
+}
+
+// Gallery Context Menu
+var galleryGrid = document.getElementById("galleryGrid");
+var contextMenu = document.getElementById("contextMenu");
+var setWallpaperBtn = document.getElementById("setWallpaperBtn");
+var selectedImgSrc = "";
+
+if (galleryGrid) {
+  var galleryImgs = galleryGrid.querySelectorAll("img");
+  galleryImgs.forEach(function(img) {
+    img.addEventListener("contextmenu", function(e) {
+      e.preventDefault();
+      selectedImgSrc = img.src;
+      contextMenu.style.display = "block";
+      contextMenu.style.left = e.pageX + "px";
+      contextMenu.style.top = e.pageY + "px";
+    });
+  });
+}
+
+document.addEventListener("click", function() {
+  if (contextMenu) contextMenu.style.display = "none";
+});
+
+if (setWallpaperBtn) {
+  setWallpaperBtn.addEventListener("click", function() {
+    body.style.backgroundImage = "url('" + selectedImgSrc + "')";
+  });
+}
+
+// Mail App Logic
+var mailItems = document.querySelectorAll(".mail-item");
+var mailSubject = document.getElementById("mailSubject");
+var mailSender = document.getElementById("mailSender");
+var mailBody = document.getElementById("mailBody");
+
+var emails = {
+  piggy: {
+    subject: "Where are you?!",
+    sender: "From: Miss Piggy <miss.piggy@muppets.com>",
+    body: "Kermie,<br><br>I've been waiting at the restaurant for 45 minutes! You better have a good excuse this time or else! Hiiii-yah!<br><br>Love,<br>Miss Piggy"
+  },
+  fozzie: {
+    subject: "Waka Waka!",
+    sender: "From: Fozzie Bear <fozzie@muppets.com>",
+    body: "Hey Kermit!<br><br>Why did the frog take the bus to work today?<br><br>His car got toad!<br><br>Waka Waka!"
+  },
+  gonzo: {
+    subject: "Need chickens",
+    sender: "From: Gonzo <gonzo.the.great@muppets.com>",
+    body: "Kermit, <br><br>The cannon is ready. I just need 12 more chickens for the finale. Can you approve the budget?<br><br>Gonzo"
+  },
+  lipton: {
+    subject: "Ad Opportunity",
+    sender: "From: Lipton Tea <marketing@lipton.com>",
+    body: "Hi Kermit,<br><br>We'd like you to come over and film a commercial with us! Let us know if you're interested.<br><br>Best,<br>Lipton"
+  }
+};
+
+mailItems.forEach(function(item) {
+  item.addEventListener("click", function() {
+    mailItems.forEach(function(i) {
+      i.style.background = "transparent";
+      i.querySelector("div").style.color = "#333";
+    });
+    item.style.background = "#f0fdf4";
+    item.querySelector("div").style.color = "#166534";
+    
+    var id = item.getAttribute("data-id");
+    if (emails[id]) {
+      mailSubject.textContent = emails[id].subject;
+      mailSender.textContent = emails[id].sender;
+      mailBody.innerHTML = emails[id].body;
+    }
+  });
+});
+
+if (safariUrl && safariFrame) {
+  safariUrl.addEventListener("keydown", function(e) {
+    if (e.key === "Enter") {
+      var url = safariUrl.value;
+      if (!url.startsWith("http")) url = "https://" + url;
+      safariFrame.src = url;
+    }
+  });
+}
+
+if (notesArea) {
+  var savedNotes = localStorage.getItem("poloOS_notes");
+  if (savedNotes) {
+    notesArea.value = savedNotes;
+  }
+  notesArea.addEventListener("input", function() {
+    localStorage.setItem("poloOS_notes", notesArea.value);
+  });
+}
 
 function dragElement(element) {
   var initialX = 0;
@@ -114,13 +436,15 @@ function dragElement(element) {
   var currentX = 0;
   var currentY = 0;
 
-  if (document.getElementById(element.id + "header")) {
-    document.getElementById(element.id + "header").onmousedown = startDragging;
+  var header = element.querySelector('.drag-handle');
+  if (header) {
+    header.onmousedown = startDragging;
   } else {
     element.onmousedown = startDragging;
   }
 
   function startDragging(e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'BUTTON' || e.target.tagName === 'A' || e.target.closest('button')) return;
     e = e || window.event;
     e.preventDefault();
     initialX = e.clientX;
@@ -158,3 +482,82 @@ function updateTime() {
 }
 
 setInterval(updateTime, 1000);
+
+// Initialize dragging for all glass windows
+document.querySelectorAll(".glass-window").forEach(function(win) {
+  dragElement(win);
+});
+
+// Kermit AI Logic
+var kermitAiIcon = document.querySelector(".kermit-ai");
+var kermitAiApp = document.querySelector("#kermitAiApp");
+var kermitAiAppClose = document.querySelector("#kermitAiAppclose");
+var kermitAiInput = document.querySelector("#kermitAiInput");
+var kermitAiSendBtn = document.querySelector("#kermitAiSendBtn");
+var kermitAiHistory = document.querySelector("#kermitAiHistory");
+
+if(kermitAiIcon && kermitAiApp) {
+  kermitAiIcon.addEventListener("click", function() { openWindow(kermitAiApp); });
+  if(kermitAiAppClose) kermitAiAppClose.addEventListener("click", function() { closeWindow(kermitAiApp); });
+  
+  function addMessage(text, isUser) {
+    var msgDiv = document.createElement("div");
+    msgDiv.style.padding = "8px 12px";
+    msgDiv.style.borderRadius = "12px";
+    msgDiv.style.maxWidth = "85%";
+    msgDiv.style.marginBottom = "4px";
+    msgDiv.style.lineHeight = "1.4";
+    if (isUser) {
+      msgDiv.style.background = "rgba(0,0,0,0.05)";
+      msgDiv.style.alignSelf = "flex-end";
+    } else {
+      msgDiv.style.background = "rgba(46, 139, 87, 0.1)";
+      msgDiv.style.alignSelf = "flex-start";
+    }
+    msgDiv.innerText = text;
+    kermitAiHistory.appendChild(msgDiv);
+    kermitAiHistory.scrollTop = kermitAiHistory.scrollHeight;
+  }
+
+  async function handleSend() {
+    var val = kermitAiInput.value.trim();
+    if (!val) return;
+    addMessage(val, true);
+    kermitAiInput.value = "";
+    
+    // Show typing indicator
+    var typingDiv = document.createElement("div");
+    typingDiv.style.padding = "8px 12px";
+    typingDiv.style.borderRadius = "12px";
+    typingDiv.style.maxWidth = "85%";
+    typingDiv.style.marginBottom = "4px";
+    typingDiv.style.lineHeight = "1.4";
+    typingDiv.style.background = "rgba(46, 139, 87, 0.1)";
+    typingDiv.style.alignSelf = "flex-start";
+    typingDiv.style.fontStyle = "italic";
+    typingDiv.innerText = "Kermit is thinking...";
+    kermitAiHistory.appendChild(typingDiv);
+    kermitAiHistory.scrollTop = kermitAiHistory.scrollHeight;
+
+    try {
+      var prompt = "respond as kermit the frog from the muppets: " + val;
+      var response = await fetch("/api/chat?prompt=" + encodeURIComponent(prompt));
+      
+      if (!response.ok) {
+        throw new Error("Failed to get response");
+      }
+      
+      var text = await response.text();
+      kermitAiHistory.removeChild(typingDiv);
+      addMessage(text, false);
+    } catch (e) {
+      kermitAiHistory.removeChild(typingDiv);
+      addMessage("Sorry, my connection to the swamp is a bit weak right now. Try again later!", false);
+    }
+  }
+
+  kermitAiSendBtn.addEventListener("click", handleSend);
+  kermitAiInput.addEventListener("keydown", function(e) {
+    if (e.key === "Enter") handleSend();
+  });
+}

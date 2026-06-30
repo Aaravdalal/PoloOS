@@ -18,41 +18,44 @@
         transition: background-image 0.4s ease, background-color 0.4s ease;
       }
 
-      #settingsPanel {
-        position: fixed;
-        top: 72px;
-        right: 18px;
-        width: min(320px, calc(100vw - 36px));
-        padding: 18px;
-        border-radius: 20px;
-        background: linear-gradient(180deg, rgba(24, 24, 27, 0.72), rgba(24, 24, 27, 0.55));
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        box-shadow: 0 18px 48px rgba(0, 0, 0, 0.35);
-        backdrop-filter: blur(24px) saturate(160%);
-        color: #ffffff;
-        display: none;
-        z-index: 1002;
-      }
+
 
       #widgetsPanel {
         position: fixed;
         top: 72px;
         right: 18px;
         width: 280px;
-        display: none;
+        display: flex;
         flex-direction: column;
         gap: 12px;
         z-index: 1001;
       }
 
+      .glass-window {
+        background: white;
+        border: 2px solid var(--accent);
+        border-radius: 16px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+        color: #333333;
+        padding: 16px;
+        resize: both;
+        overflow: hidden;
+      }
+
+      .drag-handle {
+        cursor: grab;
+      }
+      .drag-handle:active {
+        cursor: grabbing;
+      }
+
       .widget-card {
         padding: 14px;
-        background: linear-gradient(180deg, rgba(24, 24, 27, 0.64), rgba(24, 24, 27, 0.42));
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        border-radius: 18px;
-        box-shadow: 0 14px 40px rgba(0, 0, 0, 0.26);
-        backdrop-filter: blur(20px) saturate(150%);
-        color: #ffffff;
+        background: white;
+        border: 2px solid var(--accent);
+        border-radius: 16px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+        color: #333333;
       }
 
       #clockWidget {
@@ -189,7 +192,7 @@
       }
 
       #settingsButton {
-        background: linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.08));
+        background: none;
       }
 
       .dock-icon {
@@ -219,23 +222,38 @@
       }
 
       .finder {
-        background: linear-gradient(180deg, #f8d17f, #f59e0b);
+        background: linear-gradient(180deg, #86efac, #22c55e);
       }
 
       .safari {
-        background: linear-gradient(180deg, #7dd3fc, #0ea5e9);
+        background: linear-gradient(180deg, #4ade80, #16a34a);
       }
 
       .mail {
-        background: linear-gradient(180deg, #fca5a5, #ef4444);
+        background: linear-gradient(180deg, #a7f3d0, #10b981);
       }
 
       .music {
-        background: linear-gradient(180deg, #c4b5fd, #8b5cf6);
+        background: linear-gradient(180deg, #6ee7b7, #059669);
       }
 
       .notes {
-        background: linear-gradient(180deg, #86efac, #22c55e);
+        background: linear-gradient(180deg, #34d399, #047857);
+      }
+
+      .gallery {
+        background: linear-gradient(180deg, #86efac, #15803d);
+      }
+      .kermit-ai {
+        background: linear-gradient(180deg, #bbf7d0, #15803d);
+      }
+      
+      @keyframes gemini-glow {
+        0%, 100% { box-shadow: 0 0 15px 2px rgba(34,197,94,0.3), inset 0 0 20px 2px rgba(34,197,94,0.1); border: 2px solid rgba(34,197,94,0.3); }
+        50% { box-shadow: 0 0 30px 5px rgba(34,197,94,0.7), inset 0 0 30px 5px rgba(34,197,94,0.3); border: 2px solid rgba(34,197,94,0.9); }
+      }
+      #kermitAiApp {
+        animation: gemini-glow 3s infinite ease-in-out;
       }
     </style>
   </head>
@@ -252,33 +270,54 @@
       </div>
     </div>
 
-    <div id="settingsPanel" aria-label="Settings panel">
-      <h3>Settings</h3>
-      <div class="settings-section">
-        <label class="settings-label" for="wallpaperSelect">Wallpaper</label>
-        <select id="wallpaperSelect" class="settings-select">
-          <option value="./kermitwallpaper.png">Kermit</option>
-          <option value="linear-gradient(135deg, #1b4332, #2d6a4f 42%, #52b788 82%)">Kermit Green</option>
-          <option value="linear-gradient(135deg, #0b1120, #14532d 38%, #34d399 100%)">Kermit Forest</option>
-          <option value="linear-gradient(135deg, #164e63, #06b6d4 40%, #a7f3d0 100%)">Kermit Aqua</option>
-          <option value="linear-gradient(135deg, #3f6212, #84cc16 35%, #bef264 100%)">Kermit Glow</option>
-        </select>
+    <div id="settingsPanel" class="glass-window" style="display: none; position: absolute; width: 340px; top: 100px; left: 100px; z-index: 1005;">
+      <div id="settingsheader" class="drag-handle" style="display: flex; justify-content: space-between; align-items: center; user-select: none; margin-bottom: 16px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div id="settingsclose" style="width: 14px; height: 14px; background: #ff5f57; border-radius: 999px; cursor: pointer;"></div>
+          <div id="settingsminimize" style="width: 14px; height: 14px; background: #fdbc40; border-radius: 999px;"></div>
+          <div id="settingsmaximize" style="width: 14px; height: 14px; background: #32d74b; border-radius: 999px;"></div>
+        </div>
+        <span style="font-weight: 700; font-size: 14px; letter-spacing: 0.05em; color: #000;">Settings</span>
       </div>
+
+      <h1 style="margin: 0 0 20px; font-size: 24px; color: #000;">Settings</h1>
+
       <div class="settings-section">
-        <label class="settings-label" for="widgetToggle">Widgets</label>
-        <select id="widgetToggle" class="settings-select">
-          <option value="show">Show widgets</option>
-          <option value="hide">Hide widgets</option>
-        </select>
+        <label class="settings-label">BACKGROUND</label>
+        <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+          <button class="bg-type-btn" style="flex: 1; padding: 8px; border-radius: 8px; border: 1px solid rgba(0,0,0,0.1); background: transparent; font-weight: 600; cursor: pointer;">Solid</button>
+          <button class="bg-type-btn active" style="flex: 1; padding: 8px; border-radius: 8px; border: 1px solid rgba(0,0,0,0.1); background: #eee; font-weight: 600; cursor: pointer;">Static</button>
+          <button class="bg-type-btn" style="flex: 1; padding: 8px; border-radius: 8px; border: 1px solid rgba(0,0,0,0.1); background: transparent; font-weight: 600; cursor: pointer;">Live</button>
+        </div>
       </div>
+
       <div class="settings-section">
-        <label class="settings-label">Accent color</label>
+        <label class="settings-label">CHOOSE WALLPAPER</label>
+        <div id="wallpaperGrid" style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 8px;">
+          <button class="wallpaper-item" data-wallpaper="./kermitwallpaper.png" style="min-width: 60px; height: 60px; border-radius: 12px; border: 2px solid transparent; background-image: url(./kermitwallpaper.png); background-size: cover; cursor: pointer;"></button>
+          <button class="wallpaper-item" data-wallpaper="linear-gradient(135deg, #1b4332, #2d6a4f 42%, #52b788 82%)" style="min-width: 60px; height: 60px; border-radius: 12px; border: 2px solid transparent; background: linear-gradient(135deg, #1b4332, #2d6a4f 42%, #52b788 82%); cursor: pointer;"></button>
+          <button class="wallpaper-item" data-wallpaper="linear-gradient(135deg, #0b1120, #14532d 38%, #34d399 100%)" style="min-width: 60px; height: 60px; border-radius: 12px; border: 2px solid transparent; background: linear-gradient(135deg, #0b1120, #14532d 38%, #34d399 100%); cursor: pointer;"></button>
+          <button class="wallpaper-item" data-wallpaper="linear-gradient(135deg, #164e63, #06b6d4 40%, #a7f3d0 100%)" style="min-width: 60px; height: 60px; border-radius: 12px; border: 2px solid transparent; background: linear-gradient(135deg, #164e63, #06b6d4 40%, #a7f3d0 100%); cursor: pointer;"></button>
+          <button class="wallpaper-item" data-wallpaper="linear-gradient(135deg, #3f6212, #84cc16 35%, #bef264 100%)" style="min-width: 60px; height: 60px; border-radius: 12px; border: 2px solid transparent; background: linear-gradient(135deg, #3f6212, #84cc16 35%, #bef264 100%); cursor: pointer;"></button>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <label class="settings-label">ACCENT COLOR</label>
         <div class="color-row">
           <button class="settings-color" data-accent="#2e8b57" style="background:#2e8b57"></button>
           <button class="settings-color" data-accent="#60a5fa" style="background:#60a5fa"></button>
           <button class="settings-color" data-accent="#f59e0b" style="background:#f59e0b"></button>
           <button class="settings-color" data-accent="#ec4899" style="background:#ec4899"></button>
           <button class="settings-color" data-accent="#8b5cf6" style="background:#8b5cf6"></button>
+        </div>
+      </div>
+      
+      <div class="settings-section">
+        <label class="settings-label">WIDGETS</label>
+        <div style="display: flex; gap: 10px;">
+          <button id="widgetShowBtn" style="flex: 1; padding: 8px; border-radius: 8px; border: 1px solid rgba(0,0,0,0.1); background: #eee; font-weight: 600; cursor: pointer;">Show</button>
+          <button id="widgetHideBtn" style="flex: 1; padding: 8px; border-radius: 8px; border: 1px solid rgba(0,0,0,0.1); background: transparent; font-weight: 600; cursor: pointer;">Hide</button>
         </div>
       </div>
     </div>
@@ -297,21 +336,218 @@
         <span id="quoteAuthor"></span>
       </div>
     </div>
-    <div id="welcome" style="position: absolute; border: 2px solid #2e8b57; width: 200px; border-radius: 16px; padding: 16px; background: white; top: 120px; left: 100px; box-shadow: 0 8px 30px rgba(0,0,0,0.25);">
-      <div id="welcomeheader" style="display: flex; justify-content: space-between; align-items: center; user-select: none; cursor: grab; margin-bottom: 8px;">
+    <div id="welcome" class="glass-window" style="position: absolute; width: 280px; top: 120px; left: 100px; z-index: 1003;">
+      <div id="welcomeheader" class="drag-handle" style="display: flex; justify-content: space-between; align-items: center; user-select: none; margin-bottom: 12px;">
         <div style="display: flex; align-items: center; gap: 8px;">
           <div id="welcomeclose" style="width: 14px; height: 14px; background: #ff5f57; border-radius: 999px; cursor: pointer;"></div>
           <div id="welcomeminimize" style="width: 14px; height: 14px; background: #fdbc40; border-radius: 999px;"></div>
           <div id="welcomemaximize" style="width: 14px; height: 14px; background: #32d74b; border-radius: 999px;"></div>
         </div>
-        <span style="font-weight: 700;">Polo OS</span>
+        <span style="font-weight: 700; font-size: 14px; letter-spacing: 0.05em; color: #000;">Polo OS</span>
       </div>
-      <h1 style="margin: 4px;">Welcome to Polo OS</h1>
-      <h2>Introduction</h2>
-      <p style="color: #2e8b57">This OS is called Polo OS and is a kermit the frog based operating system. I hope you enjoy it!</p>
+      <h1 style="margin: 4px 0 12px; font-size: 22px; color: #000;">Welcome to Polo OS</h1>
+      <h2 style="font-size: 16px; margin: 0 0 8px; color: #000;">Introduction</h2>
+      <p style="color: var(--accent); margin: 0 0 16px; line-height: 1.5; font-size: 14px;">This OS is called Polo OS and is a kermit the frog based operating system. I hope you enjoy it!</p>
       <div style="display: flex; flex-direction: column; align-items: center;">
-        <img style="width: 64px; height: 64px; border-radius: 16px; object-fit: cover" src="./nameOfImage.jpg" />
-        <a href="https://www.youtube.com/watch?v=O8n-BF5lrnQ" style="margin-top: 8px;">Check this out!</a>
+        <img style="width: 80px; height: 80px; border-radius: 20px; object-fit: cover; box-shadow: 0 4px 12px rgba(0,0,0,0.3);" src="./nameOfImage.jpg" />
+        <a href="https://www.youtube.com/watch?v=O8n-BF5lrnQ" style="margin-top: 12px; color: #60a5fa; text-decoration: none; font-weight: bold;">Check this out!</a>
+      </div>
+    </div>
+
+    <div id="musicPlayer" class="glass-window" style="display: none; position: absolute; width: 340px; top: 150px; left: 350px; z-index: 1004;">
+      <div id="musicPlayerheader" class="drag-handle" style="display: flex; justify-content: space-between; align-items: center; user-select: none; margin-bottom: 12px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div id="musicPlayerclose" style="width: 14px; height: 14px; background: #ff5f57; border-radius: 999px; cursor: pointer;"></div>
+          <div id="musicPlayerminimize" style="width: 14px; height: 14px; background: #fdbc40; border-radius: 999px;"></div>
+          <div id="musicPlayermaximize" style="width: 14px; height: 14px; background: #32d74b; border-radius: 999px;"></div>
+        </div>
+        <span style="font-weight: 700; font-size: 14px; letter-spacing: 0.05em; color: #000;">Music Player</span>
+      </div>
+      <div style="margin-bottom: 12px; display: flex; gap: 8px; flex-wrap: wrap;">
+        <button class="track-btn" data-track="w2IhccXakkE" data-title="Rapstar" data-artist="Polo G" style="padding: 6px 10px; border-radius: 8px; border: 1px solid rgba(0,0,0,0.1); background: #eee; cursor: pointer; font-size: 11px;">Rapstar</button>
+        <button class="track-btn" data-track="YNyFAro1E5M" data-title="Martin & Gina" data-artist="Polo G" style="padding: 6px 10px; border-radius: 8px; border: 1px solid rgba(0,0,0,0.1); background: #eee; cursor: pointer; font-size: 11px;">Martin & Gina</button>
+        <button class="track-btn" data-track="OQ6R4TU5Vwo" data-title="21" data-artist="Polo G" style="padding: 6px 10px; border-radius: 8px; border: 1px solid rgba(0,0,0,0.1); background: #eee; cursor: pointer; font-size: 11px;">21</button>
+        <button class="track-btn" data-track="O8n-BF5lrnQ" data-title="The Muppet Show Theme" data-artist="The Muppets" style="padding: 6px 10px; border-radius: 8px; border: 1px solid rgba(0,0,0,0.1); background: #eee; cursor: pointer; font-size: 11px;">Intro</button>
+      </div>
+      <div style="border-radius: 12px; overflow: hidden; background: #000; height: 200px;">
+        <div id="youtubePlayer"></div>
+      </div>
+    </div>
+
+    <div id="musicWidget" class="glass-window" style="display: none; position: absolute; width: 340px; top: 72px; left: 50%; transform: translateX(-50%); z-index: 1006; padding: 20px; box-sizing: border-box;">
+      <div class="drag-handle" style="position: absolute; top: 0; left: 0; right: 0; height: 16px; background: rgba(0,0,0,0.05);"></div>
+      <div style="display: flex; gap: 16px; align-items: center; margin-top: 8px; margin-bottom: 20px;">
+        <img id="widgetAlbumArt" src="https://img.youtube.com/vi/w2IhccXakkE/hqdefault.jpg" style="width: 60px; height: 60px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); object-fit: cover;">
+        <div style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
+          <div id="widgetTrackTitle" style="font-weight: bold; font-size: 16px; margin-bottom: 4px; color: #000; font-family: sans-serif;">Rapstar</div>
+          <div id="widgetTrackArtist" style="font-size: 13px; color: #666; font-family: sans-serif;">Polo G</div>
+        </div>
+        <div id="musicVisualizer" style="display: flex; gap: 3px; align-items: flex-end; height: 24px;">
+          <div class="vis-bar" style="width: 4px; height: 60%; background: var(--accent); border-radius: 4px; animation: bounce 1s infinite alternate; animation-play-state: paused;"></div>
+          <div class="vis-bar" style="width: 4px; height: 100%; background: var(--accent); border-radius: 4px; animation: bounce 1.2s infinite alternate-reverse; animation-play-state: paused;"></div>
+          <div class="vis-bar" style="width: 4px; height: 40%; background: var(--accent); border-radius: 4px; animation: bounce 0.8s infinite alternate; animation-play-state: paused;"></div>
+          <div class="vis-bar" style="width: 4px; height: 80%; background: var(--accent); border-radius: 4px; animation: bounce 1.1s infinite alternate-reverse; animation-play-state: paused;"></div>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 10px; font-size: 11px; color: #666; font-family: sans-serif; margin-bottom: 20px;">
+        <span id="widgetCurrentTime">0:00</span>
+        <div style="flex: 1; height: 6px; background: #e2e8f0; border-radius: 999px; position: relative;">
+          <div id="widgetProgressBar" style="position: absolute; top: 0; left: 0; height: 100%; width: 0%; background: #000; border-radius: 999px;"></div>
+        </div>
+        <span id="widgetDuration">-0:00</span>
+      </div>
+      <div style="display: flex; justify-content: center; align-items: center; gap: 32px;">
+        <svg id="widgetPrevBtn" width="24" height="24" viewBox="0 0 24 24" fill="#000" style="cursor:pointer;"><path d="M11 18V6l-8.5 6 8.5 6zm.5-6l8.5 6V6l-8.5 6z"/></svg>
+        <div id="widgetPlayPauseBtn" style="cursor:pointer;">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="#000"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+        </div>
+        <svg id="widgetNextBtn" width="24" height="24" viewBox="0 0 24 24" fill="#000" style="cursor:pointer;"><path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z"/></svg>
+      </div>
+      <style>
+        @keyframes bounce { from { height: 20%; } to { height: 100%; } }
+      </style>
+    </div>
+
+    <div id="contextMenu" class="glass-window" style="display: none; position: absolute; padding: 6px; z-index: 2000; width: 140px;">
+      <div id="setWallpaperBtn" class="context-menu-item" style="padding: 8px; font-size: 13px; cursor: pointer; border-radius: 6px; font-family: sans-serif; font-weight: 500;">Set Wallpaper</div>
+    </div>
+
+    <div id="galleryApp" class="glass-window" style="display: none; position: absolute; width: 400px; top: 120px; left: 150px; z-index: 1004;">
+      <div id="galleryAppheader" class="drag-handle" style="display: flex; justify-content: space-between; align-items: center; user-select: none; margin-bottom: 12px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div id="galleryAppclose" style="width: 14px; height: 14px; background: #ff5f57; border-radius: 999px; cursor: pointer;"></div>
+          <div id="galleryAppminimize" style="width: 14px; height: 14px; background: #fdbc40; border-radius: 999px;"></div>
+          <div id="galleryAppmaximize" style="width: 14px; height: 14px; background: #32d74b; border-radius: 999px;"></div>
+        </div>
+        <span style="font-weight: 700; font-size: 14px; letter-spacing: 0.05em; color: #000;">Gallery</span>
+      </div>
+      <div id="galleryGrid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; max-height: 300px; overflow-y: auto;">
+        <img class="gallery-img" src="./gallery_image_1_1782787323036.png" style="width: 100%; height: 120px; object-fit: cover; border-radius: 8px; cursor: pointer;">
+        <img class="gallery-img" src="./gallery_image_2_1782787331858.png" style="width: 100%; height: 120px; object-fit: cover; border-radius: 8px; cursor: pointer;">
+        <img class="gallery-img" src="./kermitwallpaper.png" style="width: 100%; height: 120px; object-fit: cover; border-radius: 8px; cursor: pointer;">
+        <img class="gallery-img" src="./gallery_image_6.jpg" style="width: 100%; height: 120px; object-fit: cover; border-radius: 8px; cursor: pointer;">
+      </div>
+    </div>
+
+    <div id="finderApp" class="glass-window" style="display: none; position: absolute; width: 450px; height: 300px; top: 80px; left: 50px; z-index: 1004;">
+      <div id="finderAppheader" class="drag-handle" style="display: flex; justify-content: space-between; align-items: center; user-select: none; margin-bottom: 12px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div id="finderAppclose" style="width: 14px; height: 14px; background: #ff5f57; border-radius: 999px; cursor: pointer;"></div>
+          <div id="finderAppminimize" style="width: 14px; height: 14px; background: #fdbc40; border-radius: 999px;"></div>
+          <div id="finderAppmaximize" style="width: 14px; height: 14px; background: #32d74b; border-radius: 999px;"></div>
+        </div>
+        <span style="font-weight: 700; font-size: 14px; letter-spacing: 0.05em; color: #000;">Finder</span>
+      </div>
+      <div style="display: flex; height: calc(100% - 30px); gap: 12px; position: relative;">
+        <div style="width: 120px; border-right: 1px solid rgba(0,0,0,0.1); padding-right: 8px;">
+          <div style="padding: 6px; font-weight: bold; font-size: 13px; background: #eee; border-radius: 6px; margin-bottom: 4px;">Documents</div>
+          <div style="padding: 6px; font-size: 13px; cursor: pointer;">Downloads</div>
+          <div style="padding: 6px; font-size: 13px; cursor: pointer;">Pictures</div>
+        </div>
+        <div style="flex: 1; display: flex; gap: 16px; align-content: flex-start; flex-wrap: wrap;">
+          <div id="fileSecretPlan" style="text-align: center; width: 60px; cursor: pointer;">
+            <div style="width: 48px; height: 48px; background: #86efac; border-radius: 8px; margin: 0 auto; display: flex; align-items: center; justify-content: center;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg></div>
+            <div style="font-size: 11px; margin-top: 4px; color: #333;">secret_plan.txt</div>
+          </div>
+          <div id="fileTodo" style="text-align: center; width: 60px; cursor: pointer;">
+            <div style="width: 48px; height: 48px; background: #86efac; border-radius: 8px; margin: 0 auto; display: flex; align-items: center; justify-content: center;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg></div>
+            <div style="font-size: 11px; margin-top: 4px; color: #333;">todo.txt</div>
+          </div>
+        </div>
+        
+        <div id="finderEasterEgg" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 10; border-radius: 12px; flex-direction: column; align-items: center; justify-content: center;">
+          <h2 style="color: var(--accent); margin: 0 0 10px; font-family: sans-serif;">The Muppet Show!</h2>
+          <img src="./kermitwallpaper.png" style="width: 200px; height: 120px; object-fit: cover; border-radius: 12px; margin-bottom: 15px;">
+          <div style="font-family: sans-serif; font-size: 14px; margin-bottom: 15px; color: #333;">"It's time to play the music, it's time to light the lights!"</div>
+          <button id="closeEasterEgg" style="padding: 8px 16px; border-radius: 8px; border: none; background: var(--accent); color: white; cursor: pointer; font-weight: bold;">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="safariApp" class="glass-window" style="display: none; position: absolute; width: 600px; height: 400px; top: 50px; left: 100px; z-index: 1004;">
+      <div id="safariAppheader" class="drag-handle" style="display: flex; justify-content: space-between; align-items: center; user-select: none; margin-bottom: 8px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div id="safariAppclose" style="width: 14px; height: 14px; background: #ff5f57; border-radius: 999px; cursor: pointer;"></div>
+          <div id="safariAppminimize" style="width: 14px; height: 14px; background: #fdbc40; border-radius: 999px;"></div>
+          <div id="safariAppmaximize" style="width: 14px; height: 14px; background: #32d74b; border-radius: 999px;"></div>
+        </div>
+        <div style="flex: 1; margin: 0 16px; background: #f1f5f9; border-radius: 8px; padding: 4px 12px; display: flex; align-items: center; border: 1px solid #cbd5e1;">
+          <input id="safariUrl" type="text" value="https://en.wikipedia.org/wiki/Kermit_the_Frog" style="width: 100%; background: none; border: none; outline: none; font-size: 12px; color: #333;">
+        </div>
+        <div style="width: 46px;"></div>
+      </div>
+      <div style="height: calc(100% - 32px); border-radius: 8px; overflow: hidden; border: 1px solid #cbd5e1;">
+        <iframe id="safariFrame" src="https://en.wikipedia.org/wiki/Kermit_the_Frog" style="width: 100%; height: 100%; border: none;"></iframe>
+      </div>
+    </div>
+
+    <div id="mailApp" class="glass-window" style="display: none; position: absolute; width: 500px; height: 350px; top: 180px; left: 200px; z-index: 1004;">
+      <div id="mailAppheader" class="drag-handle" style="display: flex; justify-content: space-between; align-items: center; user-select: none; margin-bottom: 12px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div id="mailAppclose" style="width: 14px; height: 14px; background: #ff5f57; border-radius: 999px; cursor: pointer;"></div>
+          <div id="mailAppminimize" style="width: 14px; height: 14px; background: #fdbc40; border-radius: 999px;"></div>
+          <div id="mailAppmaximize" style="width: 14px; height: 14px; background: #32d74b; border-radius: 999px;"></div>
+        </div>
+        <span style="font-weight: 700; font-size: 14px; letter-spacing: 0.05em; color: #000;">Mail</span>
+      </div>
+      <div style="display: flex; height: calc(100% - 30px); border-top: 1px solid rgba(0,0,0,0.1); padding-top: 8px;">
+        <div style="width: 160px; border-right: 1px solid rgba(0,0,0,0.1); overflow-y: auto;">
+          <div class="mail-item" data-id="piggy" style="padding: 8px; border-bottom: 1px solid rgba(0,0,0,0.05); background: #f0fdf4; cursor: pointer;">
+            <div style="font-weight: bold; font-size: 12px; color: #166534;">Miss Piggy</div>
+            <div style="font-size: 11px; color: #666; margin-top: 2px;">Where are you?!</div>
+          </div>
+          <div class="mail-item" data-id="fozzie" style="padding: 8px; border-bottom: 1px solid rgba(0,0,0,0.05); cursor: pointer;">
+            <div style="font-weight: bold; font-size: 12px; color: #333;">Fozzie Bear</div>
+            <div style="font-size: 11px; color: #666; margin-top: 2px;">Waka Waka!</div>
+          </div>
+          <div class="mail-item" data-id="gonzo" style="padding: 8px; border-bottom: 1px solid rgba(0,0,0,0.05); cursor: pointer;">
+            <div style="font-weight: bold; font-size: 12px; color: #333;">Gonzo</div>
+            <div style="font-size: 11px; color: #666; margin-top: 2px;">Need chickens</div>
+          </div>
+          <div class="mail-item" data-id="lipton" style="padding: 8px; border-bottom: 1px solid rgba(0,0,0,0.05); cursor: pointer;">
+            <div style="font-weight: bold; font-size: 12px; color: #333;">Lipton Tea</div>
+            <div style="font-size: 11px; color: #666; margin-top: 2px;">Ad Opportunity</div>
+          </div>
+        </div>
+        <div id="mailContent" style="flex: 1; padding: 12px; overflow-y: auto; font-family: sans-serif;">
+          <div id="mailSubject" style="font-size: 18px; font-weight: bold; margin-bottom: 4px;">Where are you?!</div>
+          <div id="mailSender" style="font-size: 12px; color: #666; margin-bottom: 16px;">From: Miss Piggy &lt;miss.piggy@muppets.com&gt;</div>
+          <div id="mailBody" style="font-size: 13px; line-height: 1.5; color: #333;">
+            Kermie,<br><br>
+            I've been waiting at the restaurant for 45 minutes! You better have a good excuse this time or else! Hiiii-yah!<br><br>
+            Love,<br>Miss Piggy
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="notesApp" class="glass-window" style="display: none; position: absolute; width: 350px; height: 350px; top: 150px; left: 400px; z-index: 1004;">
+      <div id="notesAppheader" class="drag-handle" style="display: flex; justify-content: space-between; align-items: center; user-select: none; margin-bottom: 12px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div id="notesAppclose" style="width: 14px; height: 14px; background: #ff5f57; border-radius: 999px; cursor: pointer;"></div>
+          <div id="notesAppminimize" style="width: 14px; height: 14px; background: #fdbc40; border-radius: 999px;"></div>
+          <div id="notesAppmaximize" style="width: 14px; height: 14px; background: #32d74b; border-radius: 999px;"></div>
+        </div>
+        <span style="font-weight: 700; font-size: 14px; letter-spacing: 0.05em; color: #000;">Notes</span>
+      </div>
+      <textarea id="notesArea" style="width: 100%; height: calc(100% - 30px); border: none; resize: none; outline: none; background: #fefce8; padding: 12px; font-family: sans-serif; font-size: 14px; border-radius: 8px; box-sizing: border-box; line-height: 1.5;" placeholder="Type your notes here..."></textarea>
+    </div>
+
+    <div id="kermitAiApp" class="glass-window" style="display: none; position: absolute; width: 380px; height: 450px; top: 100px; left: 250px; z-index: 1007; display: none; flex-direction: column;">
+      <div id="kermitAiAppheader" class="drag-handle" style="display: flex; justify-content: space-between; align-items: center; user-select: none; margin-bottom: 12px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div id="kermitAiAppclose" style="width: 14px; height: 14px; background: #ff5f57; border-radius: 999px; cursor: pointer;"></div>
+          <div id="kermitAiAppminimize" style="width: 14px; height: 14px; background: #fdbc40; border-radius: 999px;"></div>
+          <div id="kermitAiAppmaximize" style="width: 14px; height: 14px; background: #32d74b; border-radius: 999px;"></div>
+        </div>
+        <span style="font-weight: 700; font-size: 14px; letter-spacing: 0.05em; color: #000;">Kermit AI</span>
+      </div>
+      <div id="kermitAiHistory" style="flex: 1; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; margin-bottom: 12px; font-family: sans-serif; font-size: 14px;">
+        <div style="background: rgba(46, 139, 87, 0.1); padding: 8px 12px; border-radius: 12px; align-self: flex-start; max-width: 85%;">Hi ho! Kermit the Frog here! What can I help you with?</div>
+      </div>
+      <div style="display: flex; gap: 8px;">
+        <input type="text" id="kermitAiInput" style="flex: 1; padding: 10px; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; background: rgba(0,0,0,0.03); outline: none;" placeholder="Ask Kermit anything...">
+        <button id="kermitAiSendBtn" style="padding: 10px 16px; background: var(--accent); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;">Send</button>
       </div>
     </div>
 
@@ -357,7 +593,31 @@
           <path d="M10 12h4"/>
         </svg>
       </div>
+      <div class="dock-icon gallery" title="Gallery">
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+          <circle cx="8.5" cy="8.5" r="1.5"></circle>
+          <polyline points="21 15 16 10 5 21"></polyline>
+        </svg>
+      </div>
+      <div class="dock-icon kermit-ai" title="Kermit AI">
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <!-- left eye -->
+          <circle cx="8" cy="7" r="3"></circle>
+          <circle cx="8" cy="7" r="1" fill="#ffffff" stroke="none"></circle>
+          <!-- right eye -->
+          <circle cx="16" cy="7" r="3"></circle>
+          <circle cx="16" cy="7" r="1" fill="#ffffff" stroke="none"></circle>
+          <!-- head curve -->
+          <path d="M5 9c0 5 2 9 7 9s7-4 7-9"></path>
+          <!-- collar points -->
+          <path d="M4 18l3-2 3 3 2-4 2 4 3-3 3 2"></path>
+          <!-- smile -->
+          <path d="M8 13c1.5 1.5 6.5 1.5 8 0"></path>
+        </svg>
+      </div>
     </div>
+    <script src="https://www.youtube.com/iframe_api"></script>
     <script src="./script.js"></script>
   </body>
 
