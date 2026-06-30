@@ -569,13 +569,3 @@ if(kermitAiIcon && kermitAiApp) {
     if (e.key === "Enter") handleSend();
   });
 }
-
-window.addEventListener('load', () => {
-  setTimeout(() => {
-    const bootScreen = document.getElementById('bootScreen');
-    if (bootScreen) {
-      bootScreen.style.opacity = '0';
-      setTimeout(() => bootScreen.remove(), 500);
-    }
-  }, 2000);
-});
