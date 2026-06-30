@@ -14,23 +14,13 @@ var quoteText = document.querySelector("#quoteText");
 var quoteAuthor = document.querySelector("#quoteAuthor");
 var body = document.body;
 
-var musicIcon = document.querySelector(".music");
-var musicPlayer = document.querySelector("#musicPlayer");
-var musicPlayerClose = document.querySelector("#musicPlayerclose");
-var musicWidget = document.querySelector("#musicWidget");
-var trackBtns = document.querySelectorAll(".track-btn");
-var widgetTrackTitle = document.querySelector("#widgetTrackTitle");
-var widgetTrackArtist = document.querySelector("#widgetTrackArtist");
-
-var ytPlayer;
-var widgetCurrentTime = document.querySelector("#widgetCurrentTime");
-var widgetDuration = document.querySelector("#widgetDuration");
-var widgetProgressBar = document.querySelector("#widgetProgressBar");
-var widgetPlayPauseBtn = document.querySelector("#widgetPlayPauseBtn");
-var widgetPrevBtn = document.querySelector("#widgetPrevBtn");
-var widgetNextBtn = document.querySelector("#widgetNextBtn");
-var widgetAlbumArt = document.querySelector("#widgetAlbumArt");
-var currentTrackIndex = 0;
+var calcIcon = document.querySelector(".calculator");
+var calcApp = document.querySelector("#calculatorApp");
+var calcDisplay = document.querySelector("#calcDisplay");
+var calcValue = "0";
+var calcStored = null;
+var calcOp = null;
+var calcNewNumber = true;
 
 var galleryIcon = document.querySelector(".gallery");
 var galleryApp = document.querySelector("#galleryApp");
@@ -75,25 +65,22 @@ function openWindow(element) {
   }
 }
 
-function onYouTubeIframeAPIReady() {
-  ytPlayer = new YT.Player('youtubePlayer', {
-    height: '200',
-    width: '100%',
-    videoId: 'w2IhccXakkE',
-    playerVars: { 'autoplay': 0, 'controls': 0, 'rel': 0, 'showinfo': 0 },
-    events: {
-      'onStateChange': function(event) {
-        var visBars = document.querySelectorAll('.vis-bar');
-        if (event.data == YT.PlayerState.PLAYING) {
-          widgetPlayPauseBtn.innerHTML = '<svg width="32" height="32" viewBox="0 0 24 24" fill="#000"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
-          visBars.forEach(function(b) { b.style.animationPlayState = 'running'; });
-        } else {
-          widgetPlayPauseBtn.innerHTML = '<svg width="32" height="32" viewBox="0 0 24 24" fill="#000"><path d="M8 5v14l11-7z"/></svg>';
-          visBars.forEach(function(b) { b.style.animationPlayState = 'paused'; });
-        }
-      }
-    }
-  });
+function updateCalc() {
+  if (calcDisplay) calcDisplay.textContent = calcValue;
+}
+function performCalc() {
+  if (calcStored === null || calcOp === null) return;
+  var a = parseFloat(calcStored);
+  var b = parseFloat(calcValue);
+  var res = 0;
+  if (calcOp === "+") res = a + b;
+  if (calcOp === "-") res = a - b;
+  if (calcOp === "*") res = a * b;
+  if (calcOp === "/") res = b !== 0 ? a / b : "Error";
+  calcValue = String(res);
+  calcStored = null;
+  calcOp = null;
+  calcNewNumber = true;
 }
 
 function formatTime(seconds) {
@@ -193,74 +180,43 @@ if (mailAppClose) { mailAppClose.addEventListener("click", function() { closeWin
 if (notesIcon) { notesIcon.addEventListener("click", function() { openWindow(notesApp); }); }
 if (notesAppClose) { notesAppClose.addEventListener("click", function() { closeWindow(notesApp); }); }
 
-if (musicIcon) {
-  musicIcon.addEventListener("click", function() {
-    openWindow(musicPlayer);
-    if (musicWidget) musicWidget.style.display = "block";
+if (calcIcon) {
+  calcIcon.addEventListener("click", function() {
+    openWindow(calcApp);
   });
 }
 
-if (musicPlayerClose) {
-  musicPlayerClose.addEventListener("click", function() {
-    closeWindow(musicPlayer);
-    if (musicWidget) musicWidget.style.display = "none";
-  });
-}
-
-if (musicWidget) {
-  musicWidget.addEventListener("click", function() {
-    if (musicPlayer.style.display === "none") {
-      openWindow(musicPlayer);
-    }
-  });
-}
-
-if (trackBtns) {
-  trackBtns.forEach(function(btn, index) {
-    btn.addEventListener("click", function() {
-      currentTrackIndex = index;
-      playTrackBtn(btn);
-    });
-  });
-}
-
-function playTrackBtn(btn) {
-  var trackId = btn.getAttribute("data-track");
-  var title = btn.getAttribute("data-title");
-  var artist = btn.getAttribute("data-artist");
-  if (ytPlayer && ytPlayer.loadVideoById) {
-    ytPlayer.loadVideoById(trackId);
-  }
-  if (widgetTrackTitle) widgetTrackTitle.textContent = title;
-  if (widgetTrackArtist) widgetTrackArtist.textContent = artist;
-  if (widgetAlbumArt) widgetAlbumArt.src = "https://img.youtube.com/vi/" + trackId + "/hqdefault.jpg";
-}
-
-if (widgetPlayPauseBtn) {
-  widgetPlayPauseBtn.addEventListener("click", function() {
-    if (ytPlayer && ytPlayer.getPlayerState) {
-      if (ytPlayer.getPlayerState() == YT.PlayerState.PLAYING) {
-        ytPlayer.pauseVideo();
+document.querySelectorAll(".calc-btn").forEach(function(btn) {
+  btn.addEventListener("click", function() {
+    var val = btn.getAttribute("data-val");
+    if (val === "C") {
+      calcValue = "0";
+      calcStored = null;
+      calcOp = null;
+      calcNewNumber = true;
+    } else if (val === "+/-") {
+      calcValue = String(parseFloat(calcValue) * -1);
+    } else if (val === "%") {
+      calcValue = String(parseFloat(calcValue) / 100);
+    } else if (["+", "-", "*", "/"].includes(val)) {
+      if (calcOp !== null && !calcNewNumber) performCalc();
+      calcStored = calcValue;
+      calcOp = val;
+      calcNewNumber = true;
+    } else if (val === "=") {
+      performCalc();
+    } else {
+      if (calcNewNumber) {
+        calcValue = val === "." ? "0." : val;
+        calcNewNumber = false;
       } else {
-        ytPlayer.playVideo();
+        if (val === "." && calcValue.includes(".")) return;
+        calcValue += val;
       }
     }
+    updateCalc();
   });
-}
-
-if (widgetPrevBtn) {
-  widgetPrevBtn.addEventListener("click", function() {
-    currentTrackIndex = (currentTrackIndex - 1 + trackBtns.length) % trackBtns.length;
-    playTrackBtn(trackBtns[currentTrackIndex]);
-  });
-}
-
-if (widgetNextBtn) {
-  widgetNextBtn.addEventListener("click", function() {
-    currentTrackIndex = (currentTrackIndex + 1) % trackBtns.length;
-    playTrackBtn(trackBtns[currentTrackIndex]);
-  });
-}
+});
 
 if (settingsClose) {
   settingsClose.addEventListener("click", function() {
@@ -322,14 +278,14 @@ updateWidgets();
 setInterval(updateWidgets, 1000);
 
 dragElement(document.getElementById("welcome"));
-if (document.getElementById("musicPlayer")) dragElement(document.getElementById("musicPlayer"));
+if (document.getElementById("calculatorApp")) dragElement(document.getElementById("calculatorApp"));
 if (document.getElementById("settingsPanel")) dragElement(document.getElementById("settingsPanel"));
 if (document.getElementById("galleryApp")) dragElement(document.getElementById("galleryApp"));
 if (document.getElementById("finderApp")) dragElement(document.getElementById("finderApp"));
 if (document.getElementById("safariApp")) dragElement(document.getElementById("safariApp"));
 if (document.getElementById("mailApp")) dragElement(document.getElementById("mailApp"));
 if (document.getElementById("notesApp")) dragElement(document.getElementById("notesApp"));
-if (document.getElementById("musicWidget")) dragElement(document.getElementById("musicWidget"));
+
 
 // Finder Easter Eggs
 var fileSecretPlan = document.getElementById("fileSecretPlan");
@@ -509,6 +465,36 @@ updateWidgets();
 // Initialize dragging for all glass windows and widget cards
 document.querySelectorAll(".glass-window, .widget-card").forEach(function(win) {
   dragElement(win);
+  if (win.classList.contains("glass-window")) {
+    var minBtn = win.querySelector("div[id$='minimize']");
+    var maxBtn = win.querySelector("div[id$='maximize']");
+    if (minBtn) {
+      minBtn.addEventListener("click", function() {
+        closeWindow(win);
+      });
+    }
+    if (maxBtn) {
+      maxBtn.addEventListener("click", function() {
+        if (win.dataset.maximized === "true") {
+          win.dataset.maximized = "false";
+          win.style.top = win.dataset.origTop;
+          win.style.left = win.dataset.origLeft;
+          win.style.width = win.dataset.origWidth;
+          win.style.height = win.dataset.origHeight;
+        } else {
+          win.dataset.origTop = win.style.top;
+          win.dataset.origLeft = win.style.left;
+          win.dataset.origWidth = win.style.width;
+          win.dataset.origHeight = win.style.height;
+          win.dataset.maximized = "true";
+          win.style.top = "28px";
+          win.style.left = "0";
+          win.style.width = "100%";
+          win.style.height = "calc(100vh - 28px)";
+        }
+      });
+    }
+  }
 });
 
 // Kermit AI Logic
