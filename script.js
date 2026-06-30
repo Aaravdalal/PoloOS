@@ -149,25 +149,27 @@ function updateWidgets() {
     quoteAuthor.textContent = "— " + dailyQuote.author;
   }
 
-  if (ytPlayer && ytPlayer.getCurrentTime && widgetCurrentTime && widgetDuration) {
-    var currentTime = ytPlayer.getCurrentTime();
-    var duration = ytPlayer.getDuration();
-    if (duration > 0) {
-      widgetCurrentTime.textContent = formatTime(currentTime);
-      widgetDuration.textContent = "-" + formatTime(duration - currentTime);
-      var progress = (currentTime / duration) * 100;
-      widgetProgressBar.style.width = progress + "%";
-    }
-  }
+
 }
 
-
+welcomeScreenClose.addEventListener("click", function() {
+  closeWindow(welcomeScreen);
+});
 
 if (galleryIcon) { galleryIcon.addEventListener("click", function() { openWindow(galleryApp); }); }
+if (galleryAppClose) { galleryAppClose.addEventListener("click", function() { closeWindow(galleryApp); }); }
+
 if (finderIcon) { finderIcon.addEventListener("click", function() { openWindow(finderApp); }); }
+if (finderAppClose) { finderAppClose.addEventListener("click", function() { closeWindow(finderApp); }); }
+
 if (safariIcon) { safariIcon.addEventListener("click", function() { openWindow(safariApp); }); }
+if (safariAppClose) { safariAppClose.addEventListener("click", function() { closeWindow(safariApp); }); }
+
 if (mailIcon) { mailIcon.addEventListener("click", function() { openWindow(mailApp); }); }
+if (mailAppClose) { mailAppClose.addEventListener("click", function() { closeWindow(mailApp); }); }
+
 if (notesIcon) { notesIcon.addEventListener("click", function() { openWindow(notesApp); }); }
+if (notesAppClose) { notesAppClose.addEventListener("click", function() { closeWindow(notesApp); }); }
 
 if (calcIcon) {
   calcIcon.addEventListener("click", function() {
@@ -207,7 +209,11 @@ document.querySelectorAll(".calc-btn").forEach(function(btn) {
   });
 });
 
-
+if (settingsClose) {
+  settingsClose.addEventListener("click", function() {
+    closeWindow(settingsPanel);
+  });
+}
 
 settingsButton.addEventListener("click", function() {
   if (settingsPanel.style.display === "none") {
@@ -404,7 +410,8 @@ function dragElement(element) {
   }
 
   function startDragging(e) {
-    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'BUTTON' || e.target.tagName === 'A' || e.target.closest('button') || e.target.id.endsWith('close') || e.target.id.endsWith('minimize') || e.target.id.endsWith('maximize')) return;
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'BUTTON' || e.target.tagName === 'A' || e.target.closest('button')) return;
+    if (e.target.id && (e.target.id.endsWith('close') || e.target.id.endsWith('minimize') || e.target.id.endsWith('maximize'))) return;
     e = e || window.event;
     e.preventDefault();
     initialX = e.clientX;
@@ -451,15 +458,8 @@ updateWidgets();
 document.querySelectorAll(".glass-window, .widget-card").forEach(function(win) {
   dragElement(win);
   if (win.classList.contains("glass-window")) {
-    var closeBtn = win.querySelector("div[id$='close']");
     var minBtn = win.querySelector("div[id$='minimize']");
     var maxBtn = win.querySelector("div[id$='maximize']");
-    
-    if (closeBtn) {
-      closeBtn.addEventListener("click", function() {
-        closeWindow(win);
-      });
-    }
     if (minBtn) {
       minBtn.addEventListener("click", function() {
         closeWindow(win);
