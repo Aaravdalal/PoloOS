@@ -9,6 +9,7 @@ ENJOY!
 
 ### Kermit Assistant
 ![Kermit Assistant UI](assets/kermit-assistant.png)
+
 Ready to help at a kermits notice!
 
 ### Desktop with Multiple Windows
